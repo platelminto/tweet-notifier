@@ -11,4 +11,7 @@ if __name__ == '__main__':
 
     tweets = get_latest_tweets(users)
 
-    print(tweets)
+    for t in tweets:
+        print(t.title)
+        print(t.message)
+        print()
