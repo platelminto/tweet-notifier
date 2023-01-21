@@ -30,7 +30,10 @@ def _get(path: str, params: dict = None) -> dict:
         headers=_get_headers(),
     )
 
-    return response.json()['data']
+    if response.status_code != 200:
+        raise Exception(response.status_code, response.text)
+
+    return response.json()
 
 
 def _get_user_ids(users: list[str]) -> list[str]:
@@ -39,16 +42,17 @@ def _get_user_ids(users: list[str]) -> list[str]:
         new_users = [user for user in users if user not in user_datas]
 
         if new_users:
-            data = _get(
+            response = _get(
                 '/users/by',
                 params={'usernames': ','.join(new_users)},
             )
+            data = response['data']
 
             for user_data in data:
                 username = user_data.pop('username')
                 user_datas[username] = user_data
 
-            db['user_ids'] = user_datas
+            db['user_info'] = user_datas
 
         return [str(user_datas[user]['id']) for user in users]
 
@@ -58,12 +62,25 @@ def _get_latest_user_tweets(user_id: str) -> list[Tweet]:
         latest_tweet_ids = db.get('latest_tweet_ids', {})
         latest_tweet_id = latest_tweet_ids.get(user_id)
 
-        data = _get(
+        response = _get(
             f'/users/{user_id}/tweets',
-            params={'until_id': latest_tweet_id},
+            params={
+                'since_id': latest_tweet_id,
+                'expansions': 'author_id',
+                'max_results': 100,  # Max allowed by API
+            },
         )
+        data = response.get('data')
 
-        latest_tweet_ids[user_id] = data[0]['id']
+        if not data:
+            return []
+
+        # meta = response['meta']
+        author_name = response['includes']['users'][0]['name']
+
+        latest_tweet_ids[user_id] = data[2]['id']  # TODO change to meta newest_id
+
+        db['latest_tweet_ids'] = latest_tweet_ids
 
         if not latest_tweet_id:
             return []
@@ -72,7 +89,7 @@ def _get_latest_user_tweets(user_id: str) -> list[Tweet]:
             Tweet(
                 tweet['text'],
                 tweet['id'],
-                db['user_info'][user_id]['name'],
+                author_name,
             ) for tweet in data]
 
 
