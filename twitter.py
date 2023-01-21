@@ -1,5 +1,6 @@
 import itertools
 import json
+import logging
 import shelve
 from dataclasses import dataclass
 from enum import Enum
@@ -45,7 +46,7 @@ class Tweet:
                 return f'''\
 {self.content}
 
-{self.linked_type}:
+{self.linked_type.name}:
 @{self.linked.author_handle}: "{self.linked.content}"'''
 
             return f'{self.linked.author_handle}: "{self.linked.content}"'
@@ -54,11 +55,11 @@ class Tweet:
 
 def _get_headers():
     with open('auth.json') as f:
-        auth = json.load(f)
+        auth = json.load(f)['twitter']
 
     return {
         'Authorization': f'Bearer {auth["bearer"]}',
-        'User-Agent': 'v2TweetNotifsPython',
+        'User-Agent': 'v2TweetNotifierPython',
     }
 
 
@@ -70,7 +71,7 @@ def _get(path: str, params: dict = None) -> dict:
     )
 
     if response.status_code != 200:
-        raise Exception(response.status_code, response.text)
+        logging.error(f'Error getting {path}: {response.status_code}. {response.text}')
 
     return response.json()
 
@@ -160,13 +161,13 @@ def _get_latest_user_tweets(user_id: str) -> list[Tweet]:
 
         meta = response['meta']
         includes = response['includes']
-        author = includes['users'][0]
 
         # latest_tweet_ids[user_id] = data[0]['id']  # change for testing
         latest_tweet_ids[user_id] = meta['newest_id']
 
         db['latest_tweet_ids'] = latest_tweet_ids
 
+        # If the latest tweet wasn't specified (i.e. first time running), return no tweets.
         if not latest_tweet_id:
             return []
 
@@ -177,7 +178,7 @@ def _get_latest_user_tweets(user_id: str) -> list[Tweet]:
                 linked_id = tweet_data['referenced_tweets'][0]['id']
                 linked_tweet_data = [t for t in includes['tweets'] if t['id'] == linked_id][0]
 
-            tweet = _get_tweet_from_data(tweet_data, author, linked_tweet_data)
+            tweet = _get_tweet_from_data(tweet_data, includes['users'][0], linked_tweet_data)
             tweets.append(tweet)
 
         return tweets

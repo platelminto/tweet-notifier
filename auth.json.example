@@ -1,5 +1,9 @@
 {
-  "key": "<API Key>",
-  "secret": "<API Key Secret>",
-  "bearer": "<Bearer Token>"
+  "twitter": {
+    "bearer": "<Bearer Token>"
+  },
+  "pushover": {
+    "app_token": "<App API Token>",
+    "user_key": "<User Key>"
+  }
 }

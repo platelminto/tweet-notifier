@@ -1,4 +1,11 @@
-[
-  "ShamsCharania",
-  "wojespn"
-]
+{
+  "twitter": {
+    "users": [
+      "wojespn",
+      "ShamsCharania"
+    ]
+  },
+  "pushover": {
+    "device": "personal-s10"
+  }
+}
