@@ -6,12 +6,6 @@ from typing import Optional
 import requests
 
 
-@dataclass
-class Message:
-    title: str
-    content: str
-
-
 def _get_auth() -> dict:
     with open('auth.json') as f:
         auth = json.load(f)['pushover']
@@ -22,13 +16,13 @@ def _get_auth() -> dict:
     }
 
 
-def send_messages(messages: list[Message], device: Optional[str] = None) -> None:
+def send_messages(messages: list[tuple[str, str]], device: Optional[str] = None) -> None:
     data = _get_auth()
 
     with requests.Session() as s:
-        for m in messages:
-            data['title'] = m.title
-            data['message'] = m.content
+        for msg in messages:
+            data['title'] = msg[0]
+            data['message'] = msg[1]
             if device:
                 data['device'] = device
 

@@ -1,6 +1,6 @@
 import json
 
-from pushover import Message, send_messages
+from pushover import send_messages
 from twitter import get_latest_tweets
 
 
@@ -14,6 +14,6 @@ if __name__ == '__main__':
     tweets = get_latest_tweets(users)
 
     send_messages(
-        [Message(tweet.title, tweet.message) for tweet in tweets],
+        [(tweet.title, tweet.message) for tweet in tweets],
         device
     )
