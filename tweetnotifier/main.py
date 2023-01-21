@@ -13,6 +13,9 @@ if __name__ == '__main__':
 
     tweets = get_latest_tweets(users)
 
+    # for testing
+    # print(*[(tweet.title, tweet.message) for tweet in tweets], sep='\n'),
+
     send_messages(
         [(tweet.title, tweet.message) for tweet in tweets],
         device

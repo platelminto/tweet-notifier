@@ -133,7 +133,24 @@ def _get_tweet_from_data(
     return Tweet(**tweet)
 
 
-def _get_latest_user_tweets(user_id: str) -> list[Tweet]:
+def _get_tweets_from_response(response_data: dict) -> list[Tweet]:
+    data = response_data['data']
+    includes = response_data['includes']
+
+    tweets = []
+    for tweet_data in data:
+        linked_tweet_data = None
+        if 'referenced_tweets' in tweet_data:
+            linked_id = tweet_data['referenced_tweets'][0]['id']
+            linked_tweet_data = [t for t in includes['tweets'] if t['id'] == linked_id][0]
+
+        tweet = _get_tweet_from_data(tweet_data, includes['users'][0], linked_tweet_data)
+        tweets.append(tweet)
+
+    return tweets
+
+
+def _get_latest_user_tweets(user_id: str, pagination_token: Optional[str] = None) -> list[Tweet]:
     with shelve.open('shelf_data') as db:
         latest_tweet_ids = db.get('latest_tweet_ids', {})
         latest_tweet_id = latest_tweet_ids.get(user_id)
@@ -143,35 +160,32 @@ def _get_latest_user_tweets(user_id: str) -> list[Tweet]:
             params={
                 'since_id': latest_tweet_id,
                 'expansions': 'author_id,referenced_tweets.id',
-                'max_results': 100,  # Max allowed by API
+                'max_results': 5,
+                'pagination_token': pagination_token,
             },
         )
-        data = response.get('data')
 
-        if not data:
+        if 'data' not in response:
             return []
 
         meta = response['meta']
-        includes = response['includes']
+        pagination_next_token = meta.get('next_token')
 
-        # latest_tweet_ids[user_id] = data[0]['id']  # change for testing
-        latest_tweet_ids[user_id] = meta['newest_id']
+        # We only update the latest tweet id when done with pagination, or if
+        # there is no previously saved tweet id.
+        if not pagination_next_token or not latest_tweet_id:
+            # latest_tweet_ids[user_id] = response['data'][12]['id']  # change for testing
+            latest_tweet_ids[user_id] = meta['newest_id']
 
-        db['latest_tweet_ids'] = latest_tweet_ids
+            db['latest_tweet_ids'] = latest_tweet_ids
 
         # If the latest tweet wasn't specified (i.e. first time running), return no tweets.
         if not latest_tweet_id:
             return []
 
-        tweets = []
-        for tweet_data in data:
-            linked_tweet_data = None
-            if 'referenced_tweets' in tweet_data:
-                linked_id = tweet_data['referenced_tweets'][0]['id']
-                linked_tweet_data = [t for t in includes['tweets'] if t['id'] == linked_id][0]
-
-            tweet = _get_tweet_from_data(tweet_data, includes['users'][0], linked_tweet_data)
-            tweets.append(tweet)
+        tweets = _get_tweets_from_response(response)
+        if pagination_next_token:
+            tweets += _get_latest_user_tweets(user_id, pagination_next_token)
 
         return tweets
 
