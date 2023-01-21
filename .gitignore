@@ -1,5 +1,5 @@
-src/config.json
-src/auth.json
+tweetnotifier/config.json
+tweetnotifier/auth.json
 venv/
 .idea/
 __pycache__/
