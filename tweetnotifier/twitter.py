@@ -21,16 +21,8 @@ class Tweet:
     tweet_id: int
     author_name: Optional[str]
     author_handle: Optional[str]
-    linked = Optional[Self]
-    linked_type = Optional[LinkedTweetType]
-
-    def __init__(self, *, content, tweet_id, author_name, author_handle, linked, linked_type):
-        self.content = content
-        self.tweet_id = tweet_id
-        self.author_name = author_name
-        self.author_handle = author_handle
-        self.linked = linked
-        self.linked_type = linked_type
+    linked: Optional[Self]
+    linked_type: Optional[LinkedTweetType]
 
     @property
     def title(self):
