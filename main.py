@@ -1,9 +1,14 @@
 import json
 
-with open('config.json') as f:
-    config = json.load(f)
+from twitter import get_latest_tweets
 
-users = config['users']
 
-for user in users:
-    tweets = get_latest_tweets(user)
+if __name__ == '__main__':
+    with open('config.json') as f:
+        config = json.load(f)
+
+    users = config['users']
+
+    tweets = get_latest_tweets(users)
+
+    print(tweets)
