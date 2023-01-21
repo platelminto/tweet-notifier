@@ -1,5 +1,4 @@
-{
-  "key": "<API Key>",
-  "secret": "<API Key Secret>",
-  "bearer": "<Bearer Token>"
-}
+[
+  "ShamsCharania",
+  "wojespn"
+]
