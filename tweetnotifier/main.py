@@ -9,7 +9,7 @@ if __name__ == '__main__':
         config = json.load(f)
 
     users = config['twitter']['users']
-    device = config['pushover']['device']
+    device = config['pushover'].get('device')
 
     tweets = get_latest_tweets(users)
 
