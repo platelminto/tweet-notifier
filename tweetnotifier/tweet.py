@@ -35,5 +35,5 @@ class Tweet:
 {self.linked_type.name}:
 @{self.linked.username}: "{self.linked.content}"'''
 
-            return f'{self.linked.username}: "{self.linked.content}"'
+            return f'@{self.linked.username}: "{self.linked.content}"'
         return self.content
