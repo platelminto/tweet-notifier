@@ -5,8 +5,8 @@ This is aimed at getting the notifications quickly (e.g. every minute). If this 
 
 ## Requirements
 
-- [Twitter API access](https://developer.twitter.com/en/portal/dashboard) (Free)
-- [Pushover API access](https://pushover.net/) (Requires a one-time $5 payment, 30-day free trial)
+- [Twitter API access](https://developer.twitter.com/en/portal/dashboard) (Free.)
+- [Pushover API access](https://pushover.net/) (Requires a one-time $5 payment. 30-day free trial.)
 
 ## Installation
 
