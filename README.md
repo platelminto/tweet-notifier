@@ -1,12 +1,12 @@
 # tweet-notifier
 Get pushover notifications when specific twitter accounts tweet.
 
-This is aimed at getting the notifications quickly (e.g. every minute). If this doesn't matter to you, maybe just use IFTTT (which has ~hour resolution), or Zapier (~15 minutes).
+This is aimed at getting the notifications quickly (e.g. every minute). If this doesn't matter to you, maybe just use IFTTT (which has ~hour resolution, 1 account followed), or Zapier (~15 minutes, 5 accounts).
 
 ## Requirements
 
-- [Twitter API access](https://developer.twitter.com/en/portal/dashboard)
-- [Pushover API access](https://pushover.net/)
+- [Twitter API access](https://developer.twitter.com/en/portal/dashboard) (Free)
+- [Pushover API access](https://pushover.net/) (Requires a one-time $5 payment, 30-day free trial)
 
 ## Installation
 
@@ -18,8 +18,8 @@ Copy `config.json.example` and `auth.json.example` to `config.json` and `auth.js
 
 ### `auth.json`
 
-- `twitter.bearer`: A Twitter API application bearer token. You receieve one once you create an app. You will easily fit within the free tier's limits.
-- `pushover.app_token`: A Pushover API application token. You also get one of these once you create a Pushover app, and can view it when logged in [here](https://pushover.net/). Free 30-day trial, then requires a one-time $5 payment.
+- `twitter.bearer`: A Twitter API application bearer token. You receive one once you create an app. You will easily fit within the free tier's limits.
+- `pushover.app_token`: A Pushover API application token. You also get one of these once you create a Pushover app, and can view it when logged in [here](https://pushover.net/).
 - `pushover.user_key`: Your Pushover user (or group) token.
 
 ### `config.json`
