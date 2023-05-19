@@ -1,4 +1,3 @@
-import itertools
 import json
 import logging
 import shelve
@@ -7,6 +6,9 @@ from typing import Optional
 import requests
 
 from tweet import Tweet, LinkedType
+
+MAX_OLD_TWEETS = 20
+MAX_TWEETS_PER_REQUEST = 5
 
 
 def _get_headers():
@@ -112,7 +114,7 @@ def _get_tweets_from_response(response_data: dict) -> list[Tweet]:
     return tweets
 
 
-def _get_latest_user_tweets(user_id: str, pagination_token: Optional[str] = None) -> list[Tweet]:
+def _get_latest_user_tweets(user_id: str, pagination_token: Optional[str] = None, calls=0) -> list[Tweet]:
     with shelve.open("shelf_data") as db:
         latest_tweet_ids = db.get("latest_tweet_ids", {})
         latest_tweet_id = latest_tweet_ids.get(user_id)
@@ -122,7 +124,7 @@ def _get_latest_user_tweets(user_id: str, pagination_token: Optional[str] = None
             params={
                 "since_id": latest_tweet_id,
                 "expansions": "author_id,referenced_tweets.id",
-                "max_results": 5,
+                "max_results": MAX_TWEETS_PER_REQUEST,
                 "pagination_token": pagination_token,
             },
         )
@@ -146,10 +148,10 @@ def _get_latest_user_tweets(user_id: str, pagination_token: Optional[str] = None
             return []
 
         tweets = _get_tweets_from_response(response)
-        if pagination_next_token:
-            tweets += _get_latest_user_tweets(user_id, pagination_next_token)
+        if pagination_next_token and calls * MAX_TWEETS_PER_REQUEST < MAX_OLD_TWEETS:
+            tweets += _get_latest_user_tweets(user_id, pagination_next_token, calls + 1)
 
-        return tweets
+        return tweets[:MAX_OLD_TWEETS]
 
 
 def get_latest_tweets(users: list[str]) -> list[Tweet]:
