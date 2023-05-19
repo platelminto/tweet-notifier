@@ -48,7 +48,7 @@ def _get_user_info(user_id: str) -> dict:
 def _get_user_ids(users: list[str]) -> list[str]:
     with shelve.open("shelf_data") as db:
         user_ids = db.get("user_ids", {})
-        new_users = [user for user in users if user not in user_ids]
+        new_users = [user for user in users if user.lower() not in user_ids]
 
         if new_users:
             response = _get(
@@ -58,11 +58,11 @@ def _get_user_ids(users: list[str]) -> list[str]:
             data = response["data"]
 
             for user_data in data:
-                user_ids[user_data["username"]] = user_data["id"]
+                user_ids[user_data["username"].lower()] = user_data["id"]
 
-            db["user_info"] = user_ids
+            db["user_ids"] = user_ids
 
-        return [str(user_ids[user]) for user in users]
+        return [str(user_ids[user.lower()]) for user in users]
 
 
 def _get_tweet_from_data(
@@ -155,5 +155,7 @@ def _get_latest_user_tweets(user_id: str, pagination_token: Optional[str] = None
 def get_latest_tweets(users: list[str]) -> list[Tweet]:
     user_ids = _get_user_ids(users)
 
-    # Flatten list
-    return list(itertools.chain.from_iterable([_get_latest_user_tweets(user_id) for user_id in user_ids]))
+    result = []
+    for user_id in user_ids:
+        result.extend(_get_latest_user_tweets(user_id))
+    return result
